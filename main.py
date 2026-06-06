@@ -50,7 +50,11 @@ def load_pdf(folder_path:str):
     return document_content
 
 
-# Example Usage:
-
-print(f"Total pieces created: {len(pieces)}")
-print(f"First piece word count: {len(pieces[0].split())}")
+KNOWLEDGE_FOLDER = "./knowledge"
+final_chunks = load_pdf(KNOWLEDGE_FOLDER)
+if final_chunks:
+    print("Ingestion successfull")
+    print(f"Total pieces created: {len(final_chunks)}")
+else:
+    print("No chunks were created. check if your folder path is correct or not.")
+    
