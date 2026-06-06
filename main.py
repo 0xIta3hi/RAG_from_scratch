@@ -1,23 +1,19 @@
 def chunk_text(text: str, chunk_size: int = 256, chunk_overlap: int = 32):
     """
-    Chunks text by words with a sliding window overlap.
+    Chunking engine 
+    following are the tasks: text, chunks array in which all the "chunk" will be stored. 
+    start_idx, end_idx.
     """
     words = text.split()
     chunks = []
-    
-    start_index = 0
-    while start_index < len(words):
-        # Determine the end index of the current chunk
-        end_index = start_index + chunk_size
-        
-        # Extract chunk and join with spaces
-        chunk_words = words[start_index:end_index]
+    start_idx = 0
+    while start_idx < len(words):
+        end_idx = start_idx + chunk_size
+        chunk_words = words[start_idx:end_idx]
         chunk = " ".join(chunk_words)
         chunks.append(chunk)
-        
-        # Move the sliding window
-        start_index += chunk_size - chunk_overlap
-    print(chunks)
+
+        start_idx += chunk_size - chunk_overlap
     return chunks
 
 # Example Usage:
