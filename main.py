@@ -1,3 +1,6 @@
+import os
+from pypdf import PdfReader
+
 def chunk_text(text: str, chunk_size: int = 256, chunk_overlap: int = 32):
     """
     Chunking engine 
@@ -16,9 +19,38 @@ def chunk_text(text: str, chunk_size: int = 256, chunk_overlap: int = 32):
         start_idx += chunk_size - chunk_overlap
     return chunks
 
+def load_pdf(folder_path:str):
+    document_content = []
+    if not os.path.exists(folder_path):
+        print("Folder Not found")
+        return None
+
+    for filename in os.listdir(folder_path):
+        if filename.lower().endswith('.pdf'):
+            file_path = os.path.join(folder_path, filename)
+            print(f"processing {filename}")
+
+            try:
+                reader = PdfReader(file_path)
+                for page_num, page in enumerate(reader.pages, start=1):
+                    page_text = page.extract_text()
+
+                    page_chunks = chunk_text(page_text)
+
+                    for small_chunk in page_chunks:
+                        chunk = {
+                            "text":small_chunk,
+                            "source":filename,
+                            "page":page_num
+                        }
+                        document_content.append(chunk)
+                
+            except Exception as e:
+                print(f"following error occured: {e}")
+    return document_content
+
+
 # Example Usage:
-document_text = "Your long document goes here " * 50
-pieces = chunk_text(document_text, chunk_size=256, chunk_overlap=32)
 
 print(f"Total pieces created: {len(pieces)}")
 print(f"First piece word count: {len(pieces[0].split())}")
