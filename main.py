@@ -4,7 +4,6 @@ import sentence_transformers
 
 model = sentence_transformers.SentenceTransformer('all-MiniLM-L6-v2')
 
-
 def chunk_text(text: str, chunk_size: int = 256, chunk_overlap: int = 32):
     """
     Chunking engine 
@@ -52,6 +51,12 @@ def load_pdf(folder_path:str):
             except Exception as e:
                 print(f"following error occured: {e}")
     return document_content
+
+
+def vector_embeddings(text):
+    embeddings = model.encode(text)
+    return embeddings
+
 
 
 KNOWLEDGE_FOLDER = "./knowledge"
