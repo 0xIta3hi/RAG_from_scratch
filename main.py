@@ -63,7 +63,7 @@ def embedding_to_db(chunks_list):
     for chunk in chunks_list:
         raw_text = chunk["text"]
         source = chunk["source"]
-        page = chunk["page_num"]
+        page = chunk["page"]
     
         vector_embedding = vector_embeddings(raw_text)
 
