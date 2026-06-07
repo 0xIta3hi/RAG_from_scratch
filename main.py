@@ -1,5 +1,9 @@
 import os
 from pypdf import PdfReader
+import sentence_transformers
+
+model = sentence_transformers.SentenceTransformer('all-MiniLM-L6-v2')
+
 
 def chunk_text(text: str, chunk_size: int = 256, chunk_overlap: int = 32):
     """
