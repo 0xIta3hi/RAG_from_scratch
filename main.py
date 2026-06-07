@@ -57,6 +57,25 @@ def vector_embeddings(text):
     embeddings = model.encode(text)
     return embeddings
 
+def embedding_to_db(chunks_list):
+    vector_db = []
+    print("\n Generating In-memory Vector_DB")
+    for chunk in chunks_list:
+        raw_text = chunk["text"]
+        source = chunk["source"]
+        page = chunk["page_num"]
+    
+        vector_embedding = vector_embeddings(raw_text)
+
+        updated_chunk = {
+            "text":raw_text,
+            "source":source,
+            "page":page,
+            "vector_embedding":vector_embedding # new data added.
+        }
+        vector_db.append(updated_chunk)
+    return vector_db
+
 
 
 KNOWLEDGE_FOLDER = "./knowledge"
@@ -64,6 +83,10 @@ final_chunks = load_pdf(KNOWLEDGE_FOLDER)
 if final_chunks:
     print("Ingestion successfull")
     print(f"Total pieces created: {len(final_chunks)}")
+    print("building vector database")
+    vector_db = embedding_to_db(final_chunks)
+    print(f"Length of the vector db: {len(vector_db)}")
+    print(f"first vector in the db: {vector_db[0]}")
 else:
     print("No chunks were created. check if your folder path is correct or not.")
     
