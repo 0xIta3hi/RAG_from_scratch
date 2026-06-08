@@ -1,6 +1,7 @@
 import os
 from pypdf import PdfReader
 import sentence_transformers
+import math
 
 model = sentence_transformers.SentenceTransformer('all-MiniLM-L6-v2')
 
@@ -76,12 +77,19 @@ def embedding_to_db(chunks_list):
         vector_db.append(updated_chunk)
     return vector_db
 
-def cosine_similarity(v1: list, v2: list):
+def cosine_similarity(v1: list[float], v2: list[float]) -> float:
     # 1. calculate dot product
+    dot_product = math.sumprod(v1,v2)
     # 2. calculate magnitude for v1
+    v1_mag = math.hypot(*v1)
     # 3. calculate magnitude for v2
+    v2_mag = math.hypot(*v2)
     # 4. return cosine similarity.
-    pass
+    if v1_mag == 0.0 or v2_mag == 0:
+        return 0.0
+    else:
+        cos_sim = dot_product / (v1_mag * v2_mag)
+        return cos_sim
 
 
 KNOWLEDGE_FOLDER = "./knowledge"
