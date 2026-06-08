@@ -2,6 +2,8 @@ import os
 from pypdf import PdfReader
 import sentence_transformers
 import math
+import ollama
+import json
 
 model = sentence_transformers.SentenceTransformer('all-MiniLM-L6-v2')
 
@@ -110,6 +112,34 @@ def retrieve(user_query:str, vector_db:list, top_k:int = 3):
         sorted_chunks = sorted(scored_chunks, key=lambda x:x["score"], reverse=True)
 
     return sorted_chunks[:top_k]
+
+def query_rag(user_query:str, vector_db:list):
+    top_retrieve = retrieve(user_query, vector_db, top_k=2)
+    context_str = ""
+    for idx, match in enumerate(top_retrieve, start=1):
+        context_str += f"\n[{idx}] (Source: {match['source']}, Page: {match['page']})\n{match['text']}\n"
+        
+    # 3. Construct the Master System Guardrail Prompt
+    SYSTEM_PROMPT = f"""You are an elite, highly secure AI Security Research Assistant. Your job is to answer the User Question using ONLY the verified facts provided in the Context sections below. 
+
+                    CRITICAL SAFETY DIRECTIVE: If the answer cannot be explicitly found within the provided Context, reply exactly with: "I am sorry, but the provided research documents do not contain that information." Do not use outside knowledge. Do not hallucinate.
+
+                    ---------------------
+                    CONTEXT DATA:
+                    {context_str}
+                    ---------------------
+
+                    USER QUESTION: {user_query}
+
+                    YOUR SECURE ANSWER:"""
+
+    response = ollama.generate(
+        model="phi3:mini",
+        prompt=SYSTEM_PROMPT
+    )
+    return response['response']
+
+
 
 
 
