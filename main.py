@@ -91,6 +91,26 @@ def cosine_similarity(v1: list[float], v2: list[float]) -> float:
         cos_sim = dot_product / (v1_mag * v2_mag)
         return cos_sim
 
+def retrieve(user_query:str, vector_db:list, top_k:int = 3):
+    query_vector = vector_embeddings(user_query)
+    scored_chunks = []
+
+    for chunk in vector_db:
+        chunk_vector = chunk["vector"]
+
+        score = cosine_similarity(chunk_vector, query_vector)
+
+        scored_chunks.append({
+            "text": chunk["text"],
+            "source": chunk["source"],
+            "page": chunk["page"],
+            "score": score
+        })
+
+        sorted_chunks = sorted(scored_chunks, key=lambda x:x["score"], reverse=True)
+
+    return sorted_chunks[:top_k]
+
 
 KNOWLEDGE_FOLDER = "./knowledge"
 final_chunks = load_pdf(KNOWLEDGE_FOLDER)
