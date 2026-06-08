@@ -86,7 +86,9 @@ if final_chunks:
     print("building vector database")
     vector_db = embedding_to_db(final_chunks)
     print(f"Length of the vector db: {len(vector_db)}")
-    print(f"first vector in the db: {vector_db[0]}")
+    # print(f"first vector in the db: {vector_db[0]}")
+    print(f"First chunk in vector db: {vector_db[0]["text"]}")
+    
 else:
     print("No chunks were created. check if your folder path is correct or not.")
     
