@@ -161,6 +161,9 @@ if final_chunks:
             print(f"\nMatch #{i} (Score: {res['score']:.4f})")
             print(f"Source: {res['source']} | Page: {res['page']}")
             print(f"Text Preview: {res['text'][:150]}...")
+    print("[+] LLM answer:\n")
+    final_answer = query_rag(query, vector_db)
+    print(final_answer)
 else:
     print("No chunks were created. check if your folder path is correct or not.")
     
