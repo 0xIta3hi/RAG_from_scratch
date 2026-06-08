@@ -76,6 +76,12 @@ def embedding_to_db(chunks_list):
         vector_db.append(updated_chunk)
     return vector_db
 
+def cosine_similarity(v1: list, v2: list):
+    # 1. calculate dot product
+    # 2. calculate magnitude for v1
+    # 3. calculate magnitude for v2
+    # 4. return cosine similarity.
+    pass
 
 
 KNOWLEDGE_FOLDER = "./knowledge"
@@ -88,7 +94,8 @@ if final_chunks:
     print(f"Length of the vector db: {len(vector_db)}")
     # print(f"first vector in the db: {vector_db[0]}")
     print(f"First chunk in vector db: {vector_db[0]["text"]}")
-    
+
+
 else:
     print("No chunks were created. check if your folder path is correct or not.")
     
