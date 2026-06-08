@@ -72,7 +72,7 @@ def embedding_to_db(chunks_list):
             "text":raw_text,
             "source":source,
             "page":page,
-            "vector_embedding":vector_embedding # new data added.
+            "vector":vector_embedding # new data added.
         }
         vector_db.append(updated_chunk)
     return vector_db
@@ -112,6 +112,7 @@ def retrieve(user_query:str, vector_db:list, top_k:int = 3):
     return sorted_chunks[:top_k]
 
 
+
 KNOWLEDGE_FOLDER = "./knowledge"
 final_chunks = load_pdf(KNOWLEDGE_FOLDER)
 if final_chunks:
@@ -122,8 +123,14 @@ if final_chunks:
     print(f"Length of the vector db: {len(vector_db)}")
     # print(f"first vector in the db: {vector_db[0]}")
     print(f"First chunk in vector db: {vector_db[0]["text"]}")
-
-
+    if vector_db:
+        query = "What is a critical threat or prompt injection?"
+        results = retrieve(query, vector_db, top_k=2)
+        print(f"\n--- RETRIEVAL RESULTS FOR: '{query}' ---")
+        for i, res in enumerate(results, start=1):
+            print(f"\nMatch #{i} (Score: {res['score']:.4f})")
+            print(f"Source: {res['source']} | Page: {res['page']}")
+            print(f"Text Preview: {res['text'][:150]}...")
 else:
     print("No chunks were created. check if your folder path is correct or not.")
     
