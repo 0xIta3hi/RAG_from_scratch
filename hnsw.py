@@ -32,4 +32,21 @@ class HNSW_Index:
         if r == 0: r == 0.001
         return int(-math.log(r) * self.ml)
     
+    def _greedy_search_layer(self, query_vector:list[float], entry_node_id:int, layer_id:int) -> int:
+        current_id = entry_node_id
+        current_score = cosine_similarity(query_vector, self.node[current_id].vector)
+
+        while True:
+            changed = False
+            neighbors = self.nodes[current_id].connections[layer_id]
+            for neighbor_id in neighbors:
+                neighbor_score = cosine_similarity(query_vector, self.nodes[neighbor_id].vector)
+                if neighbor_score > current_score:
+                    current_score = neighbor_score
+                    current_id = neighbor_id
+                    changed = True
+            if not changed:
+                continue
+            return current_id
+    
     
