@@ -26,3 +26,10 @@ class HNSW_Index:
         self.entry_point_id = None 
         self.max_level = -1
         
+    def _assign_random_level(self) -> int:
+        # Get a number between 0,1
+        r = random.uniform(0, 1)
+        if r == 0: r == 0.001
+        return int(-math.log(r) * self.ml)
+    
+    
