@@ -49,4 +49,51 @@ class HNSW_Index:
                 continue
             return current_id
     
-    
+    def insert(self, node_id: int, vector: list[float], metadata: dict):
+        # 1. Determine the birth level for this new node
+        insert_level = self._assign_random_level()
+        
+        # 2. Instantiate the new node object
+        new_node = HNSW_Node(node_id, vector, metadata, insert_level)
+        self.nodes[node_id] = new_node
+        
+        # EDGE CASE: If this is the absolute first node in the database
+        if self.entry_point_id is None:
+            self.entry_point_id = node_id
+            self.max_level = insert_level
+            return
+
+        # Start tracking our navigation entry point
+        curr_obj_id = self.entry_point_id
+        
+        # PHASE 1: The Upper-Layer Fast Pass (Top Level down to Insert Level + 1)
+        # We greedily fly across the top layers just to find the closest gateway node
+        for layer in range(self.max_level, insert_level, -1):
+            curr_obj_id = self._greedy_search_layer(vector, curr_obj_id, layer)
+            
+        # PHASE 2: The Lower-Layer Link-up (Insert Level down to Layer 0)
+        # Now the node is actually born on these layers, so we must connect it!
+        # We look at the layer we are currently on or the maximum birth level, whichever is lower
+        start_layer = min(self.max_level, insert_level)
+        
+        for layer in range(start_layer, -1, -1):
+            # Find the local entry point for this specific layer
+            curr_obj_id = self._greedy_search_layer(vector, curr_obj_id, layer)
+            
+            # For simplicity in our custom build, we will make a direct bidirectional link
+            # between the new node and the closest node found on this layer.
+            # (In the full paper, they find top 'M' neighbors, but 1-to-1 tracking is perfect for our lab)
+            
+            # Establish the links
+            self.nodes[curr_obj_id].connections[layer].append(node_id)
+            new_node.connections[layer].append(curr_obj_id)
+            
+            # Enforce the Guardrail: Prune connections if they exceed self.M
+            if len(self.nodes[curr_obj_id].connections[layer]) > self.M:
+                # Simple pruning optimization: pop the first connection or sort by distance
+                self.nodes[curr_obj_id].connections[layer].pop(0)
+
+        # 3. System Upgrade Check: If the new node climbed higher than the old king
+        if insert_level > self.max_level:
+            self.entry_point_id = node_id
+            self.max_level = insert_level
