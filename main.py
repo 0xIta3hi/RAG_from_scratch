@@ -153,4 +153,14 @@ if final_chunks:
     
     # 2. Replace 'embedding_to_db' with HNSW initialization
     hnsw_db = HNSWIndex(dimension=384, M=16)
+
+    for idx, chunk in enumerate(final_chunks):
+        # Using your existing get_embedding function from Phase 2
+        vector = get_embedding(chunk["text"]) 
+        metadata = {
+            "text": chunk["text"],
+            "source": chunk["source"],
+            "page": chunk["page"]
+        }
+        hnsw_db.insert(node_id=idx, vector=vector, metadata=metadata)
     
