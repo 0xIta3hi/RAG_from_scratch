@@ -114,31 +114,31 @@ def retrieve(user_query:str, vector_db:list, top_k:int = 3):
 
     return sorted_chunks[:top_k]
 
-def query_rag(user_query:str, vector_db:list):
+def query_rag(user_query: str, hnsw_db: HNSW_Index):
+    # Convert the query into numbers using your helper
     query_vector = vector_embeddings(user_query)
-    top_retrieve = hnsw_db.search(query_vector, k=2)
+    
+    # Call the graph search method instead of flat retrieve()
+    top_matches = hnsw_db.search(query_vector, k=2)
+    
     context_str = ""
-    for idx, match in enumerate(top_retrieve, start=1):
+    for idx, match in enumerate(top_matches, start=1):
         context_str += f"\n[{idx}] (Source: {match['source']}, Page: {match['page']})\n{match['text']}\n"
         
-    # 3. Construct the Master System Guardrail Prompt
     SYSTEM_PROMPT = f"""You are an elite, highly secure AI Security Research Assistant. Your job is to answer the User Question using ONLY the verified facts provided in the Context sections below. 
 
-                    CRITICAL SAFETY DIRECTIVE: If the answer cannot be explicitly found within the provided Context, reply exactly with: "I am sorry, but the provided research documents do not contain that information." Do not use outside knowledge. Do not hallucinate.
+                        CRITICAL SAFETY DIRECTIVE: If the answer cannot be explicitly found within the provided Context, reply exactly with: "I am sorry, but the provided research documents do not contain that information." Do not use outside knowledge. Do not hallucinate.
 
-                    ---------------------
-                    CONTEXT DATA:
-                    {context_str}
-                    ---------------------
+                        ---------------------
+                        CONTEXT DATA:
+                        {context_str}
+                        ---------------------
 
-                    USER QUESTION: {user_query}
+                        USER QUESTION: {user_query}
 
-                    YOUR SECURE ANSWER:"""
+                        YOUR SECURE ANSWER:"""
 
-    response = ollama.generate(
-        model="phi3:mini",
-        prompt=SYSTEM_PROMPT
-    )
+    response = ollama.generate(model='phi3:mini', prompt=SYSTEM_PROMPT)
     return response['response']
 
 
