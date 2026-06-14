@@ -4,6 +4,7 @@ import sentence_transformers
 import math
 import ollama
 import json
+from hnsw import HNSW_Index
 
 model = sentence_transformers.SentenceTransformer('all-MiniLM-L6-v2')
 
@@ -152,11 +153,11 @@ if final_chunks:
     print("building HNSW graph vector database...")
     
     # 2. Replace 'embedding_to_db' with HNSW initialization
-    hnsw_db = HNSWIndex(dimension=384, M=16)
+    hnsw_db = HNSW_Index(dimension=384, M=16)
 
     for idx, chunk in enumerate(final_chunks):
         # Using your existing get_embedding function from Phase 2
-        vector = get_embedding(chunk["text"]) 
+        vector = vector_embeddings(chunk["text"]) 
         metadata = {
             "text": chunk["text"],
             "source": chunk["source"],
@@ -171,7 +172,7 @@ if final_chunks:
         query = "What is a critical threat or prompt injection?"
         
         # 5. Swap out flat retrieve() for HNSW Graph Search
-        query_vector = get_embedding(query)
+        query_vector = vector_embeddings(query)
         results = hnsw_db.search(query_vector, k=2)
         
         print(f"\n--- RETRIEVAL RESULTS FOR: '{query}' ---")
