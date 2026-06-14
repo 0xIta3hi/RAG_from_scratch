@@ -151,28 +151,32 @@ final_chunks = load_pdf(KNOWLEDGE_FOLDER)
 if final_chunks:
     print("Ingestion successfull")
     print(f"Total pieces created: {len(final_chunks)}")
-    print("building HNSW graph vector database...")
     
-    # 2. Replace 'embedding_to_db' with HNSW initialization
+    # 1. Generate ALL 205 vectors at once using your fast batch function
+    print("Generating embeddings in batch...")
+    vector_db = embedding_to_db(final_chunks)
+    
+    print("Building HNSW graph vector database...")
+    # 2. Initialize your HNSW Index
     hnsw_db = HNSW_Index(dimension=384, M=16)
-
-    for idx, chunk in enumerate(final_chunks):
-        # Using your existing get_embedding function from Phase 2
-        vector = vector_embeddings(chunk["text"]) 
+    
+    # 3. Loop through the pre-computed database and insert vectors instantly
+    for idx, chunk in enumerate(vector_db):
         metadata = {
             "text": chunk["text"],
             "source": chunk["source"],
             "page": chunk["page"]
         }
-        hnsw_db.insert(node_id=idx, vector=vector, metadata=metadata)
-
-        print(f"Length of the vector db: {len(hnsw_db.nodes)}")
-    print(f"First chunk in vector db: {hnsw_db.nodes[0].metadata['text']}")
+        # No model calls inside here anymore! Just pure graph structural linking.
+        hnsw_db.insert(node_id=idx, vector=chunk["vector"], metadata=metadata)
+        
+    print(f"Length of the vector db: {len(hnsw_db.nodes)}")
+    print(f"First chunk in vector db: {hnsw_db.nodes[0].metadata['text'][:100]}...")
     
     if hnsw_db.nodes:
         query = "What is a critical threat or prompt injection?"
         
-        # 5. Swap out flat retrieve() for HNSW Graph Search
+        # 4. Run your O(log N) Graph Search
         query_vector = vector_embeddings(query)
         results = hnsw_db.search(query_vector, k=2)
         
@@ -182,10 +186,8 @@ if final_chunks:
             print(f"Source: {res['source']} | Page: {res['page']}")
             print(f"Text Preview: {res['text'][:150]}...")
             
-    print("[+] LLM answer:\n")
-    
+    print("\n[+] LLM answer:\n")
     final_answer = query_rag(query, hnsw_db)
     print(final_answer)
-    
 else:
     print("No chunks were created. check if your folder path is correct or not.")
