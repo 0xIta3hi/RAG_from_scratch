@@ -1,12 +1,19 @@
 import random
 import math
 
-def cosine_similarity(v1:list[float], v2:list[float]) -> list[float]:
+def cosine_similarity(v1: list[float], v2: list[float]) -> float:
+    # 1. calculate dot product
     dot_product = math.sumprod(v1,v2)
-    v1_mag = math.hypot(v1)
-    v2_mag = math.hypot(v2)
-    cos_sim = dot_product / (v1_mag * v2_mag)
-    return cos_sim
+    # 2. calculate magnitude for v1
+    v1_mag = math.hypot(*v1)
+    # 3. calculate magnitude for v2
+    v2_mag = math.hypot(*v2)
+    # 4. return cosine similarity.
+    if v1_mag == 0.0 or v2_mag == 0:
+        return 0.0
+    else:
+        cos_sim = dot_product / (v1_mag * v2_mag)
+        return cos_sim
 
 class HNSW_Node:
     def __init__(self, node_id:int, vector:list[float], metadata:list, max_level:int):
@@ -30,11 +37,11 @@ class HNSW_Index:
         # Get a number between 0,1
         r = random.uniform(0, 1)
         if r == 0: r == 0.001
-        return int(-math.log(r) * self.ml)
+        return int(-math.log(r) * self.mL)
     
     def _greedy_search_layer(self, query_vector:list[float], entry_node_id:int, layer_id:int) -> int:
         current_id = entry_node_id
-        current_score = cosine_similarity(query_vector, self.node[current_id].vector)
+        current_score = cosine_similarity(query_vector, self.nodes[current_id].vector)
 
         while True:
             changed = False
