@@ -182,3 +182,8 @@ if final_chunks:
             
     print("[+] LLM answer:\n")
     
+    final_answer = query_rag(query, hnsw_db)
+    print(final_answer)
+    
+else:
+    print("No chunks were created. check if your folder path is correct or not.")
