@@ -115,7 +115,8 @@ def retrieve(user_query:str, vector_db:list, top_k:int = 3):
     return sorted_chunks[:top_k]
 
 def query_rag(user_query:str, vector_db:list):
-    top_retrieve = retrieve(user_query, vector_db, top_k=2)
+    query_vector = vector_embeddings(user_query)
+    top_retrieve = hnsw_db.search(query_vector, k=2)
     context_str = ""
     for idx, match in enumerate(top_retrieve, start=1):
         context_str += f"\n[{idx}] (Source: {match['source']}, Page: {match['page']})\n{match['text']}\n"
