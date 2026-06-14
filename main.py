@@ -163,4 +163,22 @@ if final_chunks:
             "page": chunk["page"]
         }
         hnsw_db.insert(node_id=idx, vector=vector, metadata=metadata)
+
+        print(f"Length of the vector db: {len(hnsw_db.nodes)}")
+    print(f"First chunk in vector db: {hnsw_db.nodes[0].metadata['text']}")
+    
+    if hnsw_db.nodes:
+        query = "What is a critical threat or prompt injection?"
+        
+        # 5. Swap out flat retrieve() for HNSW Graph Search
+        query_vector = get_embedding(query)
+        results = hnsw_db.search(query_vector, k=2)
+        
+        print(f"\n--- RETRIEVAL RESULTS FOR: '{query}' ---")
+        for i, res in enumerate(results, start=1):
+            print(f"\nMatch #{i} (Score: {res['score']:.4f})")
+            print(f"Source: {res['source']} | Page: {res['page']}")
+            print(f"Text Preview: {res['text'][:150]}...")
+            
+    print("[+] LLM answer:\n")
     
