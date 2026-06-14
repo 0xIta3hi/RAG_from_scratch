@@ -97,3 +97,35 @@ class HNSW_Index:
         if insert_level > self.max_level:
             self.entry_point_id = node_id
             self.max_level = insert_level
+
+    def search(self, query_vector:list[float], k:int=3) -> list[dict]:
+        if self.entry_point_id is None:
+            return []
+        
+        curr_obj_id = self.entry_point_id
+        
+        for layer in range(self.max_level, 0, -1):
+            curr_obj_id = self._greedy_search_layer(query_vector, curr_obj_id, layer)
+        
+        layer_0_neighbor = self.nodes[curr_obj_id].connections[0]
+
+        candidates = list(set(layer_0_neighbor + [curr_obj_id]))
+
+        scored_candidates = []
+
+        for node_id in candidates:
+            node = self.nodes[node_id]
+            score = cosine_similarity(query_vector, node.vector)
+
+            scored_candidates.append({
+                "text":node.metadata["text"],
+                "source":node.metadata["source"],
+                "page":node.metadata["page"],
+                "score":score
+                })
+        sorted_result = sorted(scored_candidates, key= lambda x:x["score"], reverse=True)
+        return sorted_result
+    
+    
+
+
